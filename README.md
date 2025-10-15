@@ -1,51 +1,29 @@
-# Spotify MPD BigData Pipeline - Starter Repo
+# Spotify Million Playlist Dataset - Big Data Project
 
-This repository is a starter scaffold for the **Spotify Million Playlist Dataset (MPD)** Big Data pipeline.
-It contains minimal example code and manifests to help you start implementing the ingestion, ETL, model training,
-streaming and serving components described in the project design.
+This project implements a full-scale big data pipeline to build a music recommendation system based on the Spotify Million Playlist Dataset.
 
-## Contents
-- `etl/` : PySpark example jobs for ingest and transform.
-- `serving/` : FastAPI microservice for candidate + ranking (example).
-- `models/` : placeholder for trained models / MLflow artifacts.
-- `infra/` : docker-compose and minimal K8s manifests.
-- `notebooks/` : starter Jupyter notebook template.
-- `scripts/` : helper scripts.
-- `requirements.txt` : Python requirements for local development.
-- `Dockerfile` : example for building the FastAPI service.
+## Architecture Overview
 
-## How to use
-1. Unzip the project:
-   ```
-   unzip spotify_mpd_pipeline.zip
-   cd spotify_mpd_pipeline
-   ```
-2. Create a Python virtualenv and install dependencies:
-   ```
-   python -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-3. Run the FastAPI example (serving):
-   ```
-   uvicorn serving.app:app --reload --host 0.0.0.0 --port 8080
-   ```
-4. Run PySpark example (adjust SPARK_HOME or use spark-submit):
-   ```
-   spark-submit etl/ingest_example.py
-   ```
-5. To push to GitHub:
-   ```
-   git init
-   git add .
-   git commit -m "Initial scaffold for MPD pipeline"
-   gh repo create your-username/spotify-mpd-pipeline --public --source=. --remote=origin
-   git push -u origin main
-   ```
-   *(If you don't have `gh` CLI, create a new repo on GitHub.com and follow instructions.)*
+The architecture follows a modern Lambda/Kappa pattern, leveraging a data lakehouse, batch/stream processing, and is fully deployed on Kubernetes.
 
-## Notes
-- This scaffold is intentionally minimal and for learning & development purposes.
-- Replace placeholders and add credentials (do **not** commit secrets).
-- See the project design doc for detailed architecture and recommended tools.
+- **Ingestion:** Kafka
+- **Storage:** MinIO + Apache Iceberg
+- **Processing:** Apache Spark (ETL, Streaming, ML)
+- **Serving:** Redis + FastAPI
+- **Orchestration:** Airflow / Dagster
+- **Deployment:** Kubernetes (K8s)
 
+## Project Structure
+
+- `/api_service`: FastAPI backend for serving recommendations.
+- `/dags`: Orchestration pipelines (Airflow/Dagster).
+- `/data_ingestion`: Scripts for initial data loading.
+- `/kubernetes`: All K8s manifests for deployment.
+- `/notebooks`: Jupyter notebooks for EDA and experimentation.
+- `/spark_jobs`: Core logic for all Spark applications.
+
+## How to Get Started
+
+1.  **Setup Environment:** (Instructions to be added)
+2.  **Run Initial Ingestion:** (Instructions to be added)
+3.  **Deploy to Kubernetes:** (Instructions to be added)
