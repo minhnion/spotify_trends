@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pyspark==3.3.2
+pandas
+sqlalchemy
+mlflow
+lightgbm
+requests
+python-dotenv
