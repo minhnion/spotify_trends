@@ -39,6 +39,7 @@ ENV/
 *.csv
 *.parquet
 data/
+minio_data/
 
 # IDE / Editor specific
 .idea/
