@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from minio import Minio
 from minio.error import S3Error
 
-def main():
+def run_batch_ingestion():
     """
     Main function to connect to MinIO and upload files.
     """
@@ -52,4 +52,4 @@ def main():
             print(f"Error uploading {file_name}.", exc)
 
 if __name__ == "__main__":
-    main()
+    run_batch_ingestion()
