@@ -1,25 +1,5 @@
-import os
-from dotenv import load_dotenv
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import explode, col
-
-def create_spark_session():
-    load_dotenv(dotenv_path='../../.env')
-
-    access_key = os.getenv("MINIO_ACCESS_KEY")
-    secret_key = os.getenv("MINIO_SECRET_KEY")
-
-    spark = (
-        SparkSession.builder.appName("SpotifyETL")
-        .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
-        .config("spark.hadoop.fs.s3a.access.key", access_key)
-        .config("spark.hadoop.fs.s3a.secret.key", secret_key)
-        .config("spark.hadoop.fs.s3a.path.style.access", "true")
-        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4")
-        .getOrCreate()
-    )
-    return spark
+from spark_jobs.utils.spark_session import create_spark_session
 
 def main():
     spark = create_spark_session()
