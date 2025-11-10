@@ -1,7 +1,7 @@
 from pyspark.sql.functions import explode, col
 from spark_jobs.utils.spark_session import create_spark_session
 
-def main():
+def run_etl_job():
     spark = create_spark_session()
     
     input_path = "s3a://spotify-raw-data/*.json"
@@ -36,4 +36,4 @@ def main():
     spark.stop()
 
 if __name__=="__main__":
-    main()
+    run_etl_job()
