@@ -1,2 +1,5 @@
 minio
 python-dotenv
+ipykernel
+pyspark
+numpy
