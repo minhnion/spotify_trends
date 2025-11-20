@@ -1,19 +1,19 @@
 version: '3.8'
 
 services:
-  # minio:
-  #   image: minio/minio:latest
-  #   container_name: minio
-  #   ports:
-  #     - "9000:9000"  # API port
-  #     - "9001:9001"  # UI port
-  #   volumes:
-  #     - ./minio_data:/data
-  #   environment:
-  #     # Value of.env
-  #     - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-  #     - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-  #   command: server /data --console-address ":9001"
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"  # API port
+      - "9001:9001"  # UI port
+    volumes:
+      - ./minio_data:/data
+    environment:
+      # Value of.env
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
   
   jupyter:
     image: jupyter/pyspark-notebook:latest
