@@ -1,24 +1,46 @@
 version: '3.8'
 
 services:
-  # minio:
-  #   image: minio/minio:latest
-  #   container_name: minio
-  #   ports:
-  #     - "9000:9000"  # API port
-  #     - "9001:9001"  # UI port
-  #   volumes:
-  #     - ./minio_data:/data
-  #   environment:
-  #     # Value of.env
-  #     - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-  #     - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-  #   command: server /data --console-address ":9001"
-  
+  # 1. MinIO (Kho chứa dữ liệu)
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      # Dữ liệu hệ thống MinIO
+      - ./minio_data:/data
+      # Mount folder JSON của bạn (đã nằm trong minio_data nhưng mount riêng cho chắc)
+    command: server /data --console-address ":9001"
+    networks:
+      - lake-net
+
+  # 2. Jupyter Notebook (Nơi bạn làm việc)
   jupyter:
     image: jupyter/pyspark-notebook:latest
     container_name: jupyter
     ports:
       - "8888:8888"
+      - "4040:4040"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
+    user: root
     volumes:
-      - ./:/home/jovyan/work
+      # 👇 DÒNG QUAN TRỌNG NHẤT:
+      # Bên trái dấu : là folder trên máy bạn (D:\spotify_trends\notebooks)
+      # Bên phải dấu : là folder trong Docker (/home/jovyan/work)
+      - ./notebooks:/home/jovyan/work
+      
+      # Mount JARs để dùng (như cũ)
+      - ./jars:/home/jovyan/jars
+    command: start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''
+    networks:
+      - lake-net
+
+networks:
+  lake-net:
