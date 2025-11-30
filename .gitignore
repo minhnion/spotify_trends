@@ -40,7 +40,7 @@ ENV/
 *.parquet
 data/
 minio_data/
-
+jars/
 # IDE / Editor specific
 .idea/
 .vscode/
