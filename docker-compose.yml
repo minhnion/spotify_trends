@@ -20,8 +20,21 @@ services:
     container_name: jupyter
     ports:
       - "8888:8888"
+      - "4040:4040"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
+    user: root
     volumes:
       - ./:/home/jovyan/work
+      # 👇 DÒNG QUAN TRỌNG NHẤT:
+      # Bên trái dấu : là folder trên máy bạn (D:\spotify_trends\notebooks)
+      # Bên phải dấu : là folder trong Docker (/home/jovyan/work)
+      - ./notebooks:/home/jovyan/work
+
+      # Mount JARs để dùng (như cũ)
+      - ./jars:/home/jovyan/jars
+    command: start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''
     
   redis:
     image: redis:latest

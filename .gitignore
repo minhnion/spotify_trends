@@ -33,7 +33,7 @@ venv/
 env/
 ENV/
 .tox/
-
+jars/
 # Data files
 *.json
 *.csv
