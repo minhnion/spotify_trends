@@ -14,7 +14,6 @@ redis_client = redis.Redis(host=redis_host, port=6379, db=0, decode_responses=Tr
 
 @app.on_event("startup")
 def startup_event():
-    """Kiểm tra kết nối Redis khi khởi động."""
     try:
         redis_client.ping()
         print("Successfully connected to Redis.")
