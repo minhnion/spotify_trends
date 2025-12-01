@@ -1,2 +1,8 @@
 minio
 python-dotenv
+ipykernel
+pyspark
+numpy
+redis
+fastapi
+uvicorn[standard]
