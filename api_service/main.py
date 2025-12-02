@@ -1,46 +1,60 @@
 import os
-import json
 import redis
 from fastapi import FastAPI, HTTPException
 
 app = FastAPI(
     title="Spotify Recommendation API",
-    description="API để lấy gợi ý bài hát cho playlist.",
+    description="Debugging Mode",
     version="1.0.0"
 )
 
+# Lấy cấu hình
 redis_host = os.getenv("REDIS_HOST", "localhost")
-redis_client = redis.Redis(host=redis_host, port=6379, db=0, decode_responses=True)
+redis_port = int(os.getenv("REDIS_PORT", 6379))
 
-@app.on_event("startup")
-def startup_event():
-    try:
-        redis_client.ping()
-        print("Successfully connected to Redis.")
-    except redis.exceptions.ConnectionError as e:
-        print(f"Error connecting to Redis: {e}")
+print(f"🔌 CONFIG: Connecting to Redis at {redis_host}:{redis_port}...")
+
+# Kết nối Redis
+try:
+    redis_client = redis.Redis(host=redis_host, port=redis_port, db=0, decode_responses=True)
+    redis_client.ping()
+    print("✅ CONNECTION SUCCESS: Connected to Redis!")
+    
+    # [DEBUG]
+    keys = redis_client.keys("playlist:*")
+    print(f"👀 DEBUG SCAN: Found {len(keys)} keys starting with 'playlist:'.")
+    if keys:
+        print(f"👉 Sample keys: {keys[:5]}")
+    else:
+        print("⚠️ WARNING: Redis is EMPTY or keys have wrong prefix!")
+        
+except Exception as e:
+    print(f"❌ CONNECTION FAILED: {e}")
 
 @app.get("/recommendations/{playlist_id}")
 def get_recommendations(playlist_id: int):
-    """
-    Lấy về danh sách 10 track_uri được gợi ý cho một playlist_id cụ thể.
-    """
-    key = f"recommendations:{playlist_id}"
+    key = f"playlist:{playlist_id}"
     
-    # Truy vấn dữ liệu từ Redis
-    recommendations_json = redis_client.get(key)
+    print(f"🔍 SEARCHING: Looking for key '{key}'...")
     
-    if recommendations_json is None:
+    data_string = redis_client.get(key)
+    
+    if data_string is None:
+        print(f"❌ NOT FOUND: Key '{key}' does not exist.")
         raise HTTPException(
             status_code=404, 
-            detail=f"Playlist with ID {playlist_id} not found or no recommendations available."
+            detail=f"Playlist with ID {playlist_id} not found."
         )
         
-    # Dữ liệu trong Redis là một chuỗi JSON, cần parse nó lại
-    recommendations = json.loads(recommendations_json)
+    print(f"✅ FOUND: Data found for '{key}'")
+    recommendations_list = data_string.split(",")
     
-    return {"playlist_id": playlist_id, "recommended_tracks": recommendations}
+    return {
+        "playlist_id": playlist_id, 
+        "recommended_tracks": recommendations_list
+    }
 
+# --- ĐOẠN QUAN TRỌNG ĐỂ TEST PASS ---
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the Spotify Recommendation API"}
+    return {"message": "Spotify Lakehouse API is Running!"}

@@ -14,6 +14,8 @@ services:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
+    networks:
+      - lake-net
   
   jupyter:
     image: jupyter/pyspark-notebook:latest
@@ -35,20 +37,30 @@ services:
       # Mount JARs để dùng (như cũ)
       - ./jars:/home/jovyan/jars
     command: start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''
+    networks:
+      - lake-net
     
   redis:
     image: redis:latest
     container_name: redis
     ports:
       - "6379:6379"
-  
+    networks:
+      - lake-net
+
+  # 👇 THÊM SERVICE API VÀO ĐÂY
   api:
-    build: ./api_service
-    container_name: api
+    build: ./api_service  # Build từ folder api_service
+    container_name: spotify-api
     ports:
-      - "8000:8000"
-    
+      - "8000:8000"       # Mở cổng 8000 ra máy thật
     environment:
-      - REDIS_HOST=redis
+      - REDIS_HOST=redis  # Tên service của container Redis
+      - REDIS_PORT=6379
     depends_on:
       - redis
+    networks:
+      - lake-net          # Cùng mạng với Redis
+
+networks:
+  lake-net:
