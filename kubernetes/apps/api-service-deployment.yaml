@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  namespace: spotify
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spotify-api
+  template:
+    metadata:
+      labels:
+        app: spotify-api
+    spec:
+      containers:
+        - name: api-container
+          image: spotify-api:latest
+          # Đảm bảo K8s không cố kéo image từ internet
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            # API cần biết địa chỉ của Redis
+            # redis-service là tên Service của Redis trong cùng namespace
+            - name: REDIS_HOST
+              value: "redis-service"
