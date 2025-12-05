@@ -19,7 +19,7 @@ def run_etl_job():
         # Create Spark session
         spark = create_spark_session()
         
-        # Define paths
+        # Define pathsa
         input_path = "s3a://spotify-raw-data/*.json"
         output_path = "s3a://spotify-processed-data/spotify_tracks"
         
@@ -64,7 +64,9 @@ def run_etl_job():
             col("track.track_uri").alias("track_uri"),
             col("track.artist_name").alias("artist_name"),
             col("track.album_name").alias("album_name"),
-            col("track.duration_ms").alias("duration_ms")    
+            col("track.duration_ms").alias("duration_ms"),
+            col("track.artist_uri").alias("artist_uri"),
+            col("track.album_uri").alias("album_uri"),
         )
         
         # Print schema

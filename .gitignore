@@ -54,3 +54,4 @@ minio_data/
 *.pem
 *.key
 credentials.json
+tests/
