@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 import traceback
 
@@ -6,7 +7,13 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from pyspark.sql.functions import explode, col
-from spark_jobs.utils.spark_session import create_spark_session
+
+if os.getenv("KUBERNETES_SERVICE_HOST"):
+    print("🚀 Running in Kubernetes environment")
+    from spark_jobs.utils.spark_session_k8s import create_spark_session
+else:
+    print("💻 Running in local environment")
+    from spark_jobs.utils.spark_session import create_spark_session
 
 
 def run_etl_job():
@@ -19,22 +26,19 @@ def run_etl_job():
         # Create Spark session
         spark = create_spark_session()
         
+        hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
+        print("\n=== FINAL HADOOP CONFIG CHECK ===")
+        print(f"fs.s3a.endpoint: {hadoop_conf.get('fs.s3a.endpoint')}")
+        print(f"fs.s3a.access.key: {hadoop_conf.get('fs.s3a.access.key')}")
+        print(f"fs.s3a.path.style.access: {hadoop_conf.get('fs.s3a.path.style.access')}")
+        print("=" * 80 + "\n")
+        
         # Define paths
         input_path = "s3a://spotify-raw-data/*.json"
         output_path = "s3a://spotify-processed-data/spotify_tracks"
         
-        print("\n" + "=" * 80)
-        print("DEBUG - Path Information:")
-        print("=" * 80)
-        print(f"input_path: '{input_path}'")
-        print(f"input_path type: {type(input_path)}")
-        print(f"input_path length: {len(input_path)}")
-        print(f"\noutput_path: '{output_path}'")
-        print(f"output_path type: {type(output_path)}")
-        print(f"output_path length: {len(output_path)}")
-        print("=" * 80 + "\n")
+        # ... GIỮ NGUYÊN PHẦN CODE CÒN LẠI ...
         
-        # Read data
         print(f"Step 1: Reading data from {input_path}...")
         df = spark.read.option("multiLine", "true").json(input_path)
         print(f"✓ Successfully read data")
@@ -64,7 +68,9 @@ def run_etl_job():
             col("track.track_uri").alias("track_uri"),
             col("track.artist_name").alias("artist_name"),
             col("track.album_name").alias("album_name"),
-            col("track.duration_ms").alias("duration_ms")    
+            col("track.duration_ms").alias("duration_ms"),
+            col("track.artist_uri").alias("artist_uri"),
+            col("track.album_uri").alias("album_uri"),
         )
         
         # Print schema
@@ -78,15 +84,6 @@ def run_etl_job():
         # Show sample data
         print("\nSample data (first 5 rows):")
         final_df.show(5, truncate=False)
-        
-        print("\n" + "=" * 80)
-        print("DEBUG - Before Writing:")
-        print("=" * 80)
-        print(f"output_path value: '{output_path}'")
-        print(f"output_path is None: {output_path is None}")
-        print(f"output_path is empty: {output_path == ''}")
-        print(f"output_path length: {len(output_path)}")
-        print("=" * 80 + "\n")
         
         # Write to S3
         print(f"Step 5: Writing data to {output_path}...")
