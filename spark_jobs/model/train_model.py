@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 
 project_root = Path(__file__).parent.parent.parent
@@ -8,8 +9,14 @@ from pyspark.sql.functions import col, lit
 from pyspark.ml.feature import StringIndexer
 from pyspark.ml.recommendation import ALS
 from pyspark.ml.evaluation import RegressionEvaluator
-from pyspark.ml import Pipeline, PipelineModel
-from spark_jobs.utils.spark_session import create_spark_session
+from pyspark.ml import Pipeline
+
+if os.getenv("KUBERNETES_SERVICE_HOST"):
+    print("🚀 Running in Kubernetes environment")
+    from spark_jobs.utils.spark_session_k8s import create_spark_session
+else:
+    print("💻 Running in local environment")
+    from spark_jobs.utils.spark_session import create_spark_session
 
 
 def run_model_training_job():
@@ -20,6 +27,12 @@ def run_model_training_job():
         print("=" * 80)
         
         spark = create_spark_session()
+        
+        hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
+        print("\n=== FINAL HADOOP CONFIG CHECK ===")
+        print(f"fs.s3a.endpoint: {hadoop_conf.get('fs.s3a.endpoint')}")
+        print(f"fs.s3a.access.key: {hadoop_conf.get('fs.s3a.access.key')}")
+        print("=" * 80 + "\n")
         
         input_path = "s3a://spotify-processed-data/spotify_tracks"
         model_output_path = "s3a://spotify-models/als_model"
