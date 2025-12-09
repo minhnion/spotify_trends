@@ -6,3 +6,4 @@ numpy
 redis
 fastapi
 uvicorn[standard]
+kafka-python
