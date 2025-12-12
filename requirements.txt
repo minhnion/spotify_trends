@@ -1,7 +1,7 @@
 minio
 python-dotenv
 ipykernel
-pyspark
+pyspark==3.5.3
 numpy
 redis
 fastapi

@@ -1,5 +1,6 @@
-pyspark
+pyspark==3.5.3
 python-dotenv
 minio
 redis
 numpy
+pymongo
