@@ -58,6 +58,23 @@ Trước khi bắt đầu, hãy đảm bảo bạn đã cài đặt các công c
       -n spotify
     ```
 
+    Kiểm tra 
+    ```bash
+    kubectl get secret minio-secret -n spotify
+    ```
+
+4.  **Tạo Secret cho MongoDB:**
+    Lưu trữ thông tin kết nối MonggoDB một cách an toàn.
+    ```bash
+    kubectl create secret generic mongodb-secret -n spotify \
+        --from-literal=MONGO_URI='mongodb+srv://nguyenhoangviethung_db_user:QPB5DBekdXmI68rn@cluster0.fuxyyc0.mongodb.net' \
+        --from-literal=MONGO_DATABASE='spotify_trends'
+    ```
+
+    Kiểm tra
+    ```bash
+    kubectl get secret mongodb-secret -n spotify
+    ```
 ---
 
 ## 🏗️ Bước 2: Triển khai Hạ tầng Cốt lõi
@@ -150,10 +167,13 @@ Bây giờ hạ tầng đã sẵn sàng, chúng ta sẽ nạp dữ liệu và ch
         # 1. Chạy ETL để xử lý dữ liệu
         ./scripts/run_etl_on_k8s.sh
 
-        # 2. Huấn luyện model
+        # 2. Ghi dữ liệu vào mongodb
+        ./scripts/run_db_population_on_k8s.sh
+
+        # 3. Huấn luyện model
         ./scripts/run_training_on_k8s.sh
 
-        # 3. Tính toán trước và lưu kết quả vào Redis
+        # 4. Tính toán trước và lưu kết quả vào Redis
         ./scripts/run_precomputation_on_k8s.sh
         ```
     *   Để theo dõi tiến trình, bạn có thể mở một terminal khác và chạy: `kubectl get pods -n spotify --watch`.
