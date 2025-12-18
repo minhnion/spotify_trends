@@ -22,10 +22,21 @@ def create_spark_session():
     print(f"Secret Key: {secret_key[:5]}...")
     print(f"Endpoint: http://localhost:9000")
     print("="*50 + "\n")
+    jars_dir = Path(project_root) / "jars"
+    
+    if not jars_dir.exists():
+        raise FileNotFoundError(f"JAR directory not found: {jars_dir}")
+    
+    jars_list = [str(p) for p in jars_dir.glob("*.jar")]
+    if not jars_list:
+        raise FileNotFoundError(f"No JAR files found in {jars_dir}")
+    
+    print(f"Found {len(jars_list)} JAR files")
     
     spark = (
         SparkSession.builder
         .appName("SpotifyETL")
+        .config("spark.jars", ",".join(jars_list))
         .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
         .config("spark.hadoop.fs.s3a.access.key", access_key)
         .config("spark.hadoop.fs.s3a.secret.key", secret_key)
@@ -84,6 +95,7 @@ def create_spark_session_with_mongo():
     
     # Find JAR files
     jars_dir = project_root / "jars"
+    
     if not jars_dir.exists():
         raise FileNotFoundError(f"JAR directory not found: {jars_dir}")
     
@@ -115,3 +127,28 @@ def create_spark_session_with_mongo():
     print("="*50 + "\n")
     
     return spark, mongo_uri, mongo_database
+
+"""if __name__ == "__main__":
+    
+    #Test Spark session with MinIO only
+    
+
+    try:
+        print("🧪 Testing Spark + MinIO session...\n")
+
+        spark = create_spark_session()
+
+        # Basic checks
+        print("✓ Spark Version:", spark.version)
+        print("✓ Spark App Name:", spark.sparkContext.appName)
+
+        # Test simple Spark action
+        df = spark.range(1, 5)
+        df.show()
+
+        print("\n✅ MinIO Spark session test SUCCESS")
+
+    except Exception as e:
+        print("\n❌ MinIO Spark session test FAILED")
+        print(str(e))
+        raise"""
