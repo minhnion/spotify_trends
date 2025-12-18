@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # ===================== MinIO =====================
@@ -9,10 +9,10 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - ./minio_data:/data
+      - minio_data:/data
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     command: server /data --console-address ":9001"
 
   # ===================== Jupyter + Spark =====================
@@ -102,14 +102,13 @@ services:
       - "8080:8080"
     command: >
       bash -c "
-      airflow db upgrade &&
-      airflow users create
-        --username admin
-        --password admin
-        --firstname admin
-        --lastname admin
-        --role Admin
-        --email admin@example.com || true &&
+      airflow db migrate &&
+      airflow users create \
+          --username admin \
+          --firstname FIRST_NAME \
+          --lastname LAST_NAME \
+          --role Admin \
+          --email admin@example.org
       airflow webserver
       "
 
@@ -132,5 +131,4 @@ services:
 # ===================== Volumes =====================
 volumes:
   minio_data:
-  kafka_data:
   airflow_postgres_data:
