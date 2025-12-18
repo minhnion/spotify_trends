@@ -9,3 +9,5 @@ uvicorn[standard]
 kafka-python
 pymongo
 python-dotenv
+pendulum
+apache-airflow
