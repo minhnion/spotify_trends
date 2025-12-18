@@ -24,8 +24,8 @@ wget -q --show-progress -P jars/ https://repo1.maven.org/maven2/org/mongodb/bson
 # Lưu ý: SDK Bundle rất nặng (~268MB), hãy kiên nhẫn
 # ==========================================
 echo "[2/5] Downloading AWS S3 Support (Heavy file)..."
-wget -q --show-progress -P jars/ https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.1/hadoop-aws-3.4.1.jar
-wget -q --show-progress -P jars/ https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.780/aws-java-sdk-bundle-1.12.780.jar
+wget -q --show-progress -P jars/ https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
+wget -q --show-progress -P jars/ https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
 
 # ==========================================
 # 3. NHÓM ICEBERG (Version: 1.5.2 for Spark 3.5)
