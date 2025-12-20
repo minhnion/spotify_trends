@@ -35,7 +35,7 @@ def run_streaming_job():
         .format("kafka")
         .option("kafka.bootstrap.servers", "localhost:9092")
         .option("subscribe", "playlist_events")
-        .option("startingOffsets", "earliest")
+        .option("startingOffsets", "latest")
         .load()
     )
 
@@ -98,7 +98,7 @@ def run_streaming_job():
     # ========================================================
     add_track_events = (
         add_track_events
-        .withWatermark("event_ts", "2 minutes")
+        .withWatermark("event_ts", "10 minutes")
         .dropDuplicates([
             "pid", "track_uri", "event_ts", "event_type"
         ])

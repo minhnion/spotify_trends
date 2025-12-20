@@ -2,6 +2,8 @@ import sys
 import os
 import traceback
 from pathlib import Path
+import json
+from pymongo import MongoClient
 
 # ============================================================
 # Project import setup
@@ -102,16 +104,19 @@ def write_batch_to_mongo(batch_df, batch_id):
     print("[DEBUG] Final DF preview:")
     final_df.show(5, truncate=False)
 
-    final_df.write \
-        .format("mongodb") \
-        .mode("append") \
-        .option("spark.mongodb.write.connection.uri", MONGO_URI) \
-        .option("spark.mongodb.write.database", MONGO_DB) \
-        .option("spark.mongodb.write.collection", COLLECTION_NAME) \
-        .save()
 
-    print(f"[Batch {batch_id}] Write completed ✅")
-    print(f"{'='*30} [Batch {batch_id}] END {'='*30}\n")
+    rows = final_df.collect()  # KHÔNG JSON
+
+    client = MongoClient(MONGO_URI)
+    collection = client[MONGO_DB][COLLECTION_NAME]
+
+    for row in rows:
+        doc = row.asDict(recursive=True)  # Row -> dict (nested OK)
+        collection.replace_one(
+            {"_id": doc["_id"]},
+            doc,
+            upsert=True
+        )
 
 
 # ============================================================
@@ -207,7 +212,7 @@ def run_features_5m_to_mongo_debug():
             stream_df.writeStream
             .foreachBatch(write_batch_to_mongo)
             .option("checkpointLocation", CHECKPOINT_PATH)
-            .outputMode("append")
+            .outputMode("update")
             .trigger(processingTime="30 seconds")
             .start()
         )
