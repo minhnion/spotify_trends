@@ -13,6 +13,7 @@ def create_spark_session():
     
     access_key = os.getenv("MINIO_ACCESS_KEY")
     secret_key = os.getenv("MINIO_SECRET_KEY")
+    minio_endpoint = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
     
     if not access_key or not secret_key:
         raise ValueError("MINIO_ACCESS_KEY and MINIO_SECRET_KEY must be set in .env file")
@@ -20,13 +21,13 @@ def create_spark_session():
     print(f"\n=== Creating Spark Session ===")
     print(f"Access Key: {access_key}")
     print(f"Secret Key: {secret_key[:5]}...")
-    print(f"Endpoint: http://localhost:9000")
+    print(f"Endpoint: {minio_endpoint}")
     print("="*50 + "\n")
     
     spark = (
         SparkSession.builder
         .appName("SpotifyETL")
-        .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
+        .config("spark.hadoop.fs.s3a.endpoint", minio_endpoint)
         .config("spark.hadoop.fs.s3a.access.key", access_key)
         .config("spark.hadoop.fs.s3a.secret.key", secret_key)
         .config("spark.hadoop.fs.s3a.path.style.access", "true")
@@ -39,7 +40,7 @@ def create_spark_session():
     
     # QUAN TRỌNG: Force set config sau khi session được tạo
     hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
-    hadoop_conf.set("fs.s3a.endpoint", "http://localhost:9000")
+    hadoop_conf.set("fs.s3a.endpoint", minio_endpoint)
     hadoop_conf.set("fs.s3a.access.key", access_key)
     hadoop_conf.set("fs.s3a.secret.key", secret_key)
     hadoop_conf.set("fs.s3a.path.style.access", "true")

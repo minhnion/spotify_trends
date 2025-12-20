@@ -40,6 +40,10 @@ jars/
 *.parquet
 data/
 minio_data/
+config/
+logs/
+plugins/
+
 
 # IDE / Editor specific
 .idea/
