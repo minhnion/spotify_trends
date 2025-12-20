@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 import os
 from pathlib import Path
 
-def create_spark_session():
+def create_spark_session(app_name="SpotifyETL"):
     """Create and config Spark session with MinIO settings from .env file."""
     script_dir = os.path.dirname(__file__)
     project_root = os.path.abspath(os.path.join(script_dir, "../../"))
@@ -35,7 +35,7 @@ def create_spark_session():
     
     spark = (
         SparkSession.builder
-        .appName("SpotifyETL")
+        .appName(app_name)
         .config("spark.jars", ",".join(jars_list))
         .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
         .config("spark.hadoop.fs.s3a.access.key", access_key)
