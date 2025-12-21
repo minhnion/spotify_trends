@@ -13,7 +13,7 @@ python3 -c "import shutil; shutil.make_archive('/tmp/spark_jobs', 'zip', '.', 's
 echo "Zipped spark_jobs to /tmp/spark_jobs.zip"
 
 spark-submit \
-  --jars /opt/jars/hadoop-aws-3.3.4.jar,/opt/jars/aws-java-sdk-bundle-1.12.262.jar \
+  --jars "$PROJECT_ROOT_DIR/jars/hadoop-aws-3.3.4.jar,$PROJECT_ROOT_DIR/jars/aws-java-sdk-bundle-1.12.262.jar" \
   --py-files /tmp/spark_jobs.zip \
   --conf spark.hadoop.fs.s3a.connection.timeout=200000 \
   --conf spark.hadoop.fs.s3a.connection.establish.timeout=5000 \
