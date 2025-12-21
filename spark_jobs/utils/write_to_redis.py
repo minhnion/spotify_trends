@@ -8,7 +8,15 @@ def write_to_redis(partition):
     Auto-detect environment (local vs K8s) based on KUBERNETES_SERVICE_HOST.
     """
     
-    if os.getenv("KUBERNETES_SERVICE_HOST"):
+    # Prioritize explicit environment variables
+    env_redis_host = os.getenv("REDIS_HOST")
+    env_redis_port = os.getenv("REDIS_PORT")
+
+    if env_redis_host:
+        redis_host = env_redis_host
+        redis_port = int(env_redis_port) if env_redis_port else 6379
+        print(f"⚙️ Env mode - Connecting to Redis at {redis_host}:{redis_port}")
+    elif os.getenv("KUBERNETES_SERVICE_HOST"):
         redis_host = 'redis-service'
         redis_port = 6379
         print(f"🚀 K8s mode - Connecting to Redis at {redis_host}:{redis_port}")
