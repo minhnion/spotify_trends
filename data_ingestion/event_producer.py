@@ -11,6 +11,8 @@ sys.path.insert(0, str(project_root))
 from spark_jobs.utils.event_generator import generate_event
 from spark_jobs.utils.config import NEW_PID_START
 
+
+
 def create_producer():
     """Tạo một Kafka Producer."""
     try:
@@ -26,35 +28,37 @@ def create_producer():
         return create_producer()
 
 def run_event_producer():
-    """
-    Hàm chính chạy producer.
-    Nhiệm vụ: Lấy sự kiện từ generator và gửi vào Kafka.
-    """
     producer = create_producer()
-    if not producer:
-        return
-
-    topic_name = 'playlist_events'
+    topic_name = "playlist_events"
     new_pid_counter = NEW_PID_START
-    
-    while True:
-        try:
+
+    try:
+        while True:
             event, new_pid_counter = generate_event(new_pid_counter)
-            
-            print(f"Sending event: {event}")
-            producer.send(topic_name, key=str(event['pid']).encode('utf-8'), value=event)
-            
-            time.sleep(random.uniform(1, 3))
-        
-        except KeyboardInterrupt:
-            print("\nProducer stopped.")
-            break
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            time.sleep(5)
-    
-    producer.flush()
-    producer.close()
+
+            # BẮT BUỘC
+            event["event_ts"] = time.strftime(
+                "%Y-%m-%dT%H:%M:%S", time.gmtime()
+            )
+
+            producer.send(
+                topic_name,
+                key=str(event["pid"]).encode(),
+                value=event
+            )
+
+            # Flush nhẹ để tránh lag window
+            if random.random() < 0.1:
+                producer.flush()
+
+            time.sleep(random.uniform(0.5, 1.5))
+
+    except KeyboardInterrupt:
+        print(" Producer stopped")
+
+    finally:
+        producer.flush()
+        producer.close()
 
 if __name__ == "__main__":
     run_event_producer()
