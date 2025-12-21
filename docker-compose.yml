@@ -51,26 +51,37 @@ services:
       - redis
   
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:latest  # Hoặc một phiên bản cụ thể như 7.6.0
     container_name: kafka
     ports:
-      - "9092:9092" 
+      - "9092:9092"   # Cổng cho client
+      - "9093:9093"   # Cổng cho controller
     environment:
       KAFKA_NODE_ID: 1
+      # Chạy ở chế độ kết hợp broker và controller
       KAFKA_PROCESS_ROLES: 'broker,controller'
+      # Danh sách các node đóng vai trò controller (chỉ có chính nó)
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
 
+      # Cấu hình các listener
+      # Mở cổng 9092 cho client và 9093 cho controller
       KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093'
+      # "Quảng cáo" địa chỉ cho các client bên ngoài Docker
       KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      # Chỉ định listener nào được dùng cho giao tiếp nội bộ giữa các broker
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
-      
-      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk' 
+      # Chỉ định listener nào được controller sử dụng
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
 
+      # Cluster ID phải là duy nhất, có thể tạo bằng lệnh: kafka-storage random-uuid
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+
+      # Các cấu hình bắt buộc cho single-node cluster
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
 
 volumes:
   minio_data:
