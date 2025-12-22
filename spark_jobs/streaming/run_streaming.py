@@ -168,7 +168,7 @@ def run_streaming_job():
         df_5m.writeStream
         .format("parquet")
         .outputMode("append")
-        .option("path", f"{base_output}/features_5m")
+        .option("path", f"{base_output}/spotify_tracks")
         .option("checkpointLocation", f"{base_ckpt}/features_5m")
         .start()
     )

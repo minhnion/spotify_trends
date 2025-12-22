@@ -144,7 +144,7 @@ def run_features_5m_to_mongo_debug():
         # ----------------------------------------------------
         # 2. Paths
         # ----------------------------------------------------
-        INPUT_PATH = "s3a://spotify-processed-data/features_5m"
+        INPUT_PATH = "s3a://spotify-processed-data/spotify_tracks"
 
         CHECKPOINT_PATH = (
             "s3a://spotify-streaming-checkpoint/"
