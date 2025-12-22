@@ -13,8 +13,8 @@ metadata:
   namespace: spotify
 rules:
   - apiGroups: [""]
-    resources: ["pods", "pods/log"]
-    verbs: ["get", "list", "watch", "create", "delete"]
+    resources: ["pods", "pods/log", "services", "configmaps", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get", "list", "watch"]
@@ -67,26 +67,64 @@ spec:
         app: airflow
     spec:
       serviceAccountName: airflow
+      initContainers:
+        - name: airflow-init
+          image: airflow-k8s:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: postgresql+psycopg2://airflow:airflow_password@airflow-postgres-service:5432/airflow_db
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo "Initializing Airflow DB..."
+              airflow db migrate
+              airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin || true
       containers:
-        - name: airflow-standalone
+        - name: airflow-webserver
           image: airflow-k8s:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: postgresql+psycopg2://airflow:airflow_password@airflow-postgres-service:5432/airflow_db
             - name: AIRFLOW__CORE__EXECUTOR
-              value: "LocalExecutor"
+              value: LocalExecutor
             - name: AIRFLOW__CORE__LOAD_EXAMPLES
               value: "False"
             - name: AIRFLOW_HOME
               value: "/opt/airflow"
-            # Standalone mode uses SQLite by default, which is fine for this single-pod setup
-            # It will create the DB file in /opt/airflow/airflow.db (on the PVC)
           volumeMounts:
             - name: airflow-data
               mountPath: /opt/airflow
-          # Command to run standalone mode
-          command: ["airflow", "standalone"]
+          command: ["airflow", "webserver"]
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+
+        - name: airflow-scheduler
+          image: airflow-k8s:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: postgresql+psycopg2://airflow:airflow_password@airflow-postgres-service:5432/airflow_db
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "False"
+            - name: AIRFLOW_HOME
+              value: "/opt/airflow"
+          volumeMounts:
+            - name: airflow-data
+              mountPath: /opt/airflow
+          command: ["airflow", "scheduler"]
+
       volumes:
         - name: airflow-data
           persistentVolumeClaim:

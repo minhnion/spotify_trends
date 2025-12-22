@@ -1,5 +1,5 @@
-from airflow.sdk.definitions.dag import dag
-from airflow.providers.standard.operators.bash import BashOperator
+from airflow.decorators import dag
+from airflow.operators.bash import BashOperator
 from pendulum import datetime, timezone
 from datetime import timedelta
 

@@ -2,8 +2,13 @@ set -e
 
 echo "Submitting Spark Precomputation job to Kubernetes..."
 
-MASTER_URI=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
-K8S_MASTER_URL="k8s://${MASTER_URI}"
+if [ -n "$KUBERNETES_SERVICE_HOST" ]; then
+    echo "Detected running inside Kubernetes..."
+    K8S_MASTER_URL="k8s://https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
+else
+    MASTER_URI=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+    K8S_MASTER_URL="k8s://${MASTER_URI}"
+fi
 
 echo "Connecting to Kubernetes Master at: $K8S_MASTER_URL"
 

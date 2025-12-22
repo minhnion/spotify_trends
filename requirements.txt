@@ -11,3 +11,4 @@ pymongo
 python-dotenv
 pendulum
 apache-airflow
+psycopg2-binary
