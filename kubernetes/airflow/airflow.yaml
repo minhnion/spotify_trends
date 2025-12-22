@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: airflow
+  namespace: spotify
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: airflow-role
+  namespace: spotify
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: airflow-role-binding
+  namespace: spotify
+subjects:
+  - kind: ServiceAccount
+    name: airflow
+    namespace: spotify
+roleRef:
+  kind: Role
+  name: airflow-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-pvc
+  namespace: spotify
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-deployment
+  namespace: spotify
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow
+  template:
+    metadata:
+      labels:
+        app: airflow
+    spec:
+      serviceAccountName: airflow
+      containers:
+        - name: airflow-standalone
+          image: airflow-k8s:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: "LocalExecutor"
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "False"
+            - name: AIRFLOW_HOME
+              value: "/opt/airflow"
+            # Standalone mode uses SQLite by default, which is fine for this single-pod setup
+            # It will create the DB file in /opt/airflow/airflow.db (on the PVC)
+          volumeMounts:
+            - name: airflow-data
+              mountPath: /opt/airflow
+          # Command to run standalone mode
+          command: ["airflow", "standalone"]
+      volumes:
+        - name: airflow-data
+          persistentVolumeClaim:
+            claimName: airflow-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-service
+  namespace: spotify
+spec:
+  selector:
+    app: airflow
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30000
+  type: NodePort

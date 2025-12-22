@@ -1,0 +1,37 @@
+FROM apache/airflow:2.10.3
+
+USER root
+
+# Install Java (required for Spark)
+RUN apt-get update && apt-get install -y openjdk-17-jdk-headless && apt-get clean
+
+# Install Spark
+RUN apt-get install -y curl wget && \
+    wget https://archive.apache.org/dist/spark/spark-3.5.0/spark-3.5.0-bin-hadoop3.tgz && \
+    tar -xzf spark-3.5.0-bin-hadoop3.tgz && \
+    mv spark-3.5.0-bin-hadoop3 /opt/spark && \
+    rm spark-3.5.0-bin-hadoop3.tgz && \
+    apt-get clean
+
+# Install kubectl
+RUN apt-get update && apt-get install -y apt-transport-https curl && \
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/ && \
+    apt-get clean
+
+# Set environment variables
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$PATH:$SPARK_HOME/bin
+
+# Copy scripts and set execute permissions
+COPY --chown=airflow:root scripts /opt/scripts
+RUN chmod +x /opt/scripts/*.sh
+
+# Copy DAGs
+COPY --chown=airflow:root dags /opt/airflow/dags
+
+USER airflow
+
+COPY --chown=airflow:root requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt

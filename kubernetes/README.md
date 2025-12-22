@@ -171,10 +171,10 @@ Bây giờ hạ tầng đã sẵn sàng, chúng ta sẽ nạp dữ liệu và ch
         ./scripts/run_db_population_on_k8s.sh
 
         # 3. Huấn luyện model
-        ./scripts/run_training_on_k8s.sh
+        ./scripts/train_model_on_k8s.sh
 
         # 4. Tính toán trước và lưu kết quả vào Redis
-        ./scripts/run_precomputation_on_k8s.sh
+        ./scripts/precompute_recomendations_on_k8s.sh
         ```
     *   Để theo dõi tiến trình, bạn có thể mở một terminal khác và chạy: `kubectl get pods -n spotify --watch`.
 
