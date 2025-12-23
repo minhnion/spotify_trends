@@ -12,10 +12,10 @@ from pyspark.sql.functions import col, struct
 
 # Check environment and import appropriate spark session creator
 if os.getenv("KUBERNETES_SERVICE_HOST"):
-    print("🚀 Running in Kubernetes environment")
+    print("Running in Kubernetes environment")
     from spark_jobs.utils.spark_session_k8s import create_spark_session_with_mongo
 else:
-    print("💻 Running in local environment")
+    print("Running in local environment")
     from spark_jobs.utils.spark_session import create_spark_session_with_mongo
 
 
@@ -30,10 +30,10 @@ def test_mongodb_connection(mongo_uri, database):
         print("="*50 + "\n")
         return True
     except ConnectionFailure:
-        print("❌ Cannot connect to MongoDB Server")
+        print("Cannot connect to MongoDB Server")
         return False
     except Exception as e:
-        print(f"❌ Error connecting to MongoDB: {e}")
+        print(f"Error connecting to MongoDB: {e}")
         return False
 
 
