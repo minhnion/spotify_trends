@@ -32,9 +32,27 @@ spark.sparkContext.setLogLevel("WARN")
 # ======================================================
 # 1. Read streaming output
 # ======================================================
-df = spark.read.parquet(
-    "s3a://spotify-processed-data/features_5m"
-)
+try:
+    print("Attempting to read streaming data from s3a://spotify-processed-data/features_5m ...")
+    df = spark.read.parquet("s3a://spotify-processed-data/features_5m")
+    
+    # Check if directory is empty (has schema but no data, though parquet read usually fails earlier if strictly empty)
+    if not df.head(1): 
+        print("⚠️ Streaming data path exists but contains no data. Skipping compaction.")
+        spark.stop()
+        sys.exit(0)
+        
+except Exception as e:
+    # Catch generic exception because Spark/Py4J errors vary
+    error_msg = str(e)
+    if "Path does not exist" in error_msg or "FileNotFoundException" in error_msg:
+        print(f"⚠️ Streaming data path not found: {error_msg}")
+        print("Skipping compaction job gracefully.")
+        spark.stop()
+        sys.exit(0)
+    else:
+        # Re-raise real errors
+        raise e
 
 # ======================================================
 # 2. Extract date from window.start
