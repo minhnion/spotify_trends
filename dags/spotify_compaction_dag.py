@@ -8,7 +8,7 @@ LOCAL_TZ = timezone("Asia/Ho_Chi_Minh")
 @dag(
     dag_id="spotify_compaction_pipeline",
     start_date=datetime(2025, 1, 1, tz=LOCAL_TZ),
-    schedule=timedelta(hours=1),
+    schedule=timedelta(minutes=15),
     catchup=False,
     tags=["spotify", "compaction"],
 )

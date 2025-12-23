@@ -18,7 +18,7 @@ from pyspark.sql.types import (
     StringType, IntegerType
 )
 
-
+from spark_jobs.utils.s3_utils import ensure_s3_bucket_exists
 # ============================================================
 # MAIN STREAMING JOB
 # ============================================================
@@ -162,6 +162,9 @@ def run_streaming_job():
     # ========================================================
     base_output = "s3a://spotify-processed-data"
     base_ckpt = "s3a://spotify-streaming-checkpoint"
+
+    ensure_s3_bucket_exists(base_output)
+    ensure_s3_bucket_exists(base_ckpt)
 
     # ---- 5 minutes ----
     q_5m = (
