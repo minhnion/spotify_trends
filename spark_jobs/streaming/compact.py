@@ -94,32 +94,4 @@ daily_df.write \
     .mode("append") \
     .parquet("s3a://spotify-processed-data/spotify_tracks")
 
-print("✓ Data successfully appended to spotify_tracks.")
-
-# ======================================================
-# 6. Delete processed files to prevent duplication
-# ======================================================
-try:
-    print("🧹 Cleaning up processed files in s3a://spotify-processed-data/features_5m ...")
-    
-    # Get Hadoop FileSystem
-    sc = spark.sparkContext
-    fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
-    src_path = sc._jvm.org.apache.hadoop.fs.Path("s3a://spotify-processed-data/features_5m")
-    
-    # Check if path exists and delete it
-    if fs.exists(src_path):
-        is_deleted = fs.delete(src_path, True) # True = recursive delete
-        if is_deleted:
-            print("✓ Successfully deleted source directory: s3a://spotify-processed-data/features_5m")
-        else:
-            print("⚠️ Failed to delete source directory.")
-    else:
-        print("⚠️ Source directory not found during cleanup (already deleted?).")
-        
-except Exception as e:
-    print(f"❌ Error during cleanup: {str(e)}")
-    # We don't exit(1) here because the main job (writing data) succeeded. 
-    # But this needs attention if it fails.
-
 spark.stop()
