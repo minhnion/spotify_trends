@@ -53,7 +53,7 @@ def run_etl_job():
         # Explode tracks
         print("\nStep 3: Exploding tracks...")
         df_tracks = df_playlists.select(
-            col("playlist.pid").alias("pid"),
+            col("playlist.pid").alias("pid").cast("long"),
             col("playlist.name").alias("playlist_name"),
             explode("playlist.tracks").alias("track")
         )
