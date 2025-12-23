@@ -7,7 +7,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from pyspark.sql.functions import explode, col
-
+from spark_jobs.utils.s3_utils import ensure_s3_bucket_exists
 if os.getenv("KUBERNETES_SERVICE_HOST"):
     print("🚀 Running in Kubernetes environment")
     from spark_jobs.utils.spark_session_k8s import create_spark_session
@@ -36,7 +36,8 @@ def run_etl_job():
         # Define paths
         input_path = "s3a://spotify-raw-data/*.json"
         output_path = "s3a://spotify-processed-data/spotify_tracks"
-        
+        ensure_s3_bucket_exists(input_path)
+        ensure_s3_bucket_exists(output_path)
         # ... GIỮ NGUYÊN PHẦN CODE CÒN LẠI ...
         
         print(f"Step 1: Reading data from {input_path}...")

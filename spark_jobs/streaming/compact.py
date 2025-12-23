@@ -8,7 +8,7 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 from spark_jobs.utils.spark_session import create_spark_session
-
+from spark_jobs.utils.s3_utils import ensure_s3_bucket_exists
 
 spark = create_spark_session(app_name="SpotifyStreamingWindows")
 

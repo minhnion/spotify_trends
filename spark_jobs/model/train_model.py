@@ -10,7 +10,7 @@ from pyspark.ml.feature import StringIndexer
 from pyspark.ml.recommendation import ALS
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml import Pipeline
-
+from spark_jobs.utils.s3_utils import ensure_s3_bucket_exists
 if os.getenv("KUBERNETES_SERVICE_HOST"):
     print("🚀 Running in Kubernetes environment")
     from spark_jobs.utils.spark_session_k8s import create_spark_session
@@ -36,7 +36,7 @@ def run_model_training_job():
         
         input_path = "s3a://spotify-processed-data/spotify_tracks"
         model_output_path = "s3a://spotify-models/als_model"
-        
+        ensure_s3_bucket_exists("s3a://spotify-models")
         print(f"\nStep 1: Reading processed data from {input_path}...")
         df = spark.read.parquet(input_path)
         print(f"✓ Loaded {df.count()} rows")
