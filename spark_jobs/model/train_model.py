@@ -37,6 +37,7 @@ def run_model_training_job():
         input_path = "s3a://spotify-processed-data/spotify_tracks"
         model_output_path = "s3a://spotify-models/als_model"
         ensure_s3_bucket_exists("s3a://spotify-models")
+        ensure_s3_bucket_exists("s3a://spotify-processed-data/")
         print(f"\nStep 1: Reading processed data from {input_path}...")
         df = spark.read.parquet(input_path)
         print(f"✓ Loaded {df.count()} rows")

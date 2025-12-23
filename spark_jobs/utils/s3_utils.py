@@ -18,13 +18,7 @@ def ensure_s3_bucket_exists(s3_path: str):
         print(f"Invalid S3 path, no bucket name found: {s3_path}")
         return
 
-    # Determine endpoint based on environment
-    if os.getenv("KUBERNETES_SERVICE_HOST"):
-        # Hardcoded to match spark_session_k8s.py
-        endpoint = "minio-service:9000"
-    else:
-        endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
-
+    endpoint = os.getenv("MINIO_ENDPOINT", "localhost:9000")
     access_key = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
     secret_key = os.getenv("MINIO_SECRET_KEY", "minioadmin")
 

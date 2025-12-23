@@ -23,20 +23,20 @@ def spotify_ml_pipeline():
         echo "=============================="
         """
     )
+    
+    train_model = BashOperator(
+        task_id="train_model",
+        bash_command="""
+        echo "Starting training job..."
+        cd /opt/scripts && bash train_model_job.sh
+        """
+    )
 
     compact = BashOperator(
         task_id="compact",
         bash_command="""
         echo "Starting compaction job..."
         cd /opt/scripts && bash compact.sh
-        """
-    )
-
-    train_model = BashOperator(
-        task_id="train_model",
-        bash_command="""
-        echo "Starting training job..."
-        cd /opt/scripts && bash train_model_job.sh
         """
     )
 
