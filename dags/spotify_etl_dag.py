@@ -48,7 +48,8 @@ def spotify_ml_pipeline():
         """
     )
 
-    ping >> compact >> train_model >> precompute_recommendations
+    # ping >> compact >> train_model >> precompute_recommendations
+    ping >> train_model >> precompute_recommendations
 
 
 spotify_ml_pipeline()

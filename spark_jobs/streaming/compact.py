@@ -5,10 +5,25 @@ from pyspark.sql.functions import (
 from pyspark.sql.functions import  lit
 import sys
 from pathlib import Path
+import os
+
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
-from spark_jobs.utils.spark_session import create_spark_session
 
+from dotenv import load_dotenv
+load_dotenv(project_root / ".env")
+
+if os.getenv("KUBERNETES_SERVICE_HOST"):
+    print("🚀 Running in Kubernetes environment")
+    from spark_jobs.utils.spark_session_k8s import create_spark_session
+else:
+    print("💻 Running in local environment")
+    from spark_jobs.utils.spark_session import create_spark_session
+
+from spark_jobs.utils.s3_utils import ensure_s3_bucket_exists
+
+# Ensure S3 bucket exists
+ensure_s3_bucket_exists("s3a://spotify-processed-data")
 
 spark = create_spark_session(app_name="SpotifyStreamingWindows")
 

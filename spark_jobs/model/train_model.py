@@ -5,6 +5,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from dotenv import load_dotenv
+load_dotenv(project_root / ".env")
+
 from pyspark.sql.functions import col, lit
 from pyspark.ml.feature import StringIndexer
 from pyspark.ml.recommendation import ALS
@@ -18,6 +21,8 @@ else:
     print("💻 Running in local environment")
     from spark_jobs.utils.spark_session import create_spark_session
 
+from spark_jobs.utils.s3_utils import ensure_s3_bucket_exists
+
 
 def run_model_training_job():
     spark = None
@@ -26,6 +31,13 @@ def run_model_training_job():
         print("Starting Model Training Job...")
         print("=" * 80)
         
+        input_path = "s3a://spotify-processed-data/spotify_tracks"
+        model_output_path = "s3a://spotify-models/als_model"
+
+        # Ensure S3 buckets exist
+        ensure_s3_bucket_exists("s3a://spotify-processed-data")
+        ensure_s3_bucket_exists("s3a://spotify-models")
+        
         spark = create_spark_session()
         
         hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
@@ -33,9 +45,6 @@ def run_model_training_job():
         print(f"fs.s3a.endpoint: {hadoop_conf.get('fs.s3a.endpoint')}")
         print(f"fs.s3a.access.key: {hadoop_conf.get('fs.s3a.access.key')}")
         print("=" * 80 + "\n")
-        
-        input_path = "s3a://spotify-processed-data/spotify_tracks"
-        model_output_path = "s3a://spotify-models/als_model"
         
         print(f"\nStep 1: Reading processed data from {input_path}...")
         df = spark.read.parquet(input_path)

@@ -6,6 +6,9 @@ import traceback
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from dotenv import load_dotenv
+load_dotenv(project_root / ".env")
+
 from pyspark.sql.functions import explode, col
 
 if os.getenv("KUBERNETES_SERVICE_HOST"):
@@ -15,6 +18,8 @@ else:
     print("💻 Running in local environment")
     from spark_jobs.utils.spark_session import create_spark_session
 
+from spark_jobs.utils.s3_utils import ensure_s3_bucket_exists
+
 
 def run_etl_job():
     spark = None
@@ -23,6 +28,14 @@ def run_etl_job():
         print("Starting Spotify ETL Job...")
         print("=" * 80)
         
+        # Define paths
+        input_path = "s3a://spotify-raw-data/*.json"
+        output_path = "s3a://spotify-processed-data/spotify_tracks"
+
+        # Ensure S3 buckets exist
+        ensure_s3_bucket_exists("s3a://spotify-raw-data")
+        ensure_s3_bucket_exists("s3a://spotify-processed-data")
+
         # Create Spark session
         spark = create_spark_session()
         
@@ -32,10 +45,6 @@ def run_etl_job():
         print(f"fs.s3a.access.key: {hadoop_conf.get('fs.s3a.access.key')}")
         print(f"fs.s3a.path.style.access: {hadoop_conf.get('fs.s3a.path.style.access')}")
         print("=" * 80 + "\n")
-        
-        # Define paths
-        input_path = "s3a://spotify-raw-data/*.json"
-        output_path = "s3a://spotify-processed-data/spotify_tracks"
         
         # ... GIỮ NGUYÊN PHẦN CODE CÒN LẠI ...
         
