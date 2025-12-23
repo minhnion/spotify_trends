@@ -10,7 +10,6 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from pyspark.sql.functions import col, struct
 
-# Check environment and import appropriate spark session creator
 if os.getenv("KUBERNETES_SERVICE_HOST"):
     print("Running in Kubernetes environment")
     from spark_jobs.utils.spark_session_k8s import create_spark_session_with_mongo
