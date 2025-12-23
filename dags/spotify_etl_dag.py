@@ -24,6 +24,14 @@ def spotify_ml_pipeline():
         """
     )
 
+    compact = BashOperator(
+        task_id="compact",
+        bash_command="""
+        echo "Starting compaction job..."
+        cd /opt/scripts && bash compact.sh
+        """
+    )
+
     train_model = BashOperator(
         task_id="train_model",
         bash_command="""
@@ -40,7 +48,7 @@ def spotify_ml_pipeline():
         """
     )
 
-    ping >> train_model >> precompute_recommendations
+    ping >> compact >> train_model >> precompute_recommendations
 
 
 spotify_ml_pipeline()
