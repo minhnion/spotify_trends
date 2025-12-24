@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spotify-producer
+  namespace: spotify
+spec:
+  replicas: 1 # Số lượng instance chạy song song
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      containers:
+      - name: producer
+        image: spotify-producer:latest # Tên image bạn vừa build
+        imagePullPolicy: Never # Bắt buộc để dùng image local trong Minikube
+        env:
+        - name: PYTHONPATH
+          value: "/app"

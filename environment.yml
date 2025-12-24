@@ -1,0 +1,12 @@
+name: big_data
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - pyspark==3.5.3
+      - pymongo         # Cần cho script 3
+      - python-dotenv   # Cần cho config
+      - py4j
