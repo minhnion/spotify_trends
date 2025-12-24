@@ -1,0 +1,19 @@
+# 1. Dùng bản Python siêu gọn nhẹ
+FROM python:3.10-slim
+
+# 2. Thiết lập thư mục làm việc
+WORKDIR /app
+
+# 3. Chỉ cài duy nhất thư viện Kafka
+# Sử dụng --no-cache-dir để image không bị phình to bởi file rác
+RUN pip install --no-cache-dir kafka-python==2.3.0
+
+# 4. Copy code vào (chỉ copy những gì cần thiết)
+# Lưu ý: Lệnh này copy toàn bộ project để đảm bảo các folder utils/ hoạt động
+COPY . .
+
+# 5. Khai báo PYTHONPATH để các module utils.event_generator nhận diện được nhau
+ENV PYTHONPATH="/app"
+
+# 6. Chạy script
+CMD ["python", "data_ingestion/event_producer_k8s.py"]

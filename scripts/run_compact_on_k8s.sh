@@ -1,0 +1,23 @@
+spark-submit \
+  --master k8s://$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}') \
+  --deploy-mode cluster \
+  --name spark-kafka-compact \
+  --conf spark.executor.instances=2 \
+  --conf spark.kubernetes.namespace=spotify \
+  --conf spark.kubernetes.container.image=spotify-spark:latest \
+  --conf spark.kubernetes.container.image.pullPolicy=Never \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.jars.ivy=/tmp/.ivy2 \
+  --conf spark.hadoop.fs.s3a.endpoint=http://minio-service.spotify.svc.cluster.local:9000 \
+  --conf spark.sql.streaming.checkpointFileManagerClass=org.apache.spark.sql.execution.streaming.HDFSBackedCheckpointFileManager \
+  --conf spark.hadoop.fs.s3a.access.key=minioadmin \
+  --conf spark.hadoop.fs.s3a.secret.key=minioadmin \
+  --conf spark.kubernetes.driverEnv.MINIO_ACCESS_KEY=minioadmin \
+  --conf spark.kubernetes.driverEnv.MINIO_SECRET_KEY=minioadmin \
+  --conf spark.kubernetes.executorEnv.MINIO_ACCESS_KEY=minioadmin \
+  --conf spark.kubernetes.executorEnv.MINIO_SECRET_KEY=minioadmin \
+  --conf spark.hadoop.fs.s3a.path.style.access=true \
+  --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
+  --conf spark.hadoop.fs.s3a.connection.ssl.enabled=false \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.apache.hadoop:hadoop-aws:3.3.4 \
+  local:///opt/spark/work-dir/spark_jobs/streaming/compact_k8s.py
